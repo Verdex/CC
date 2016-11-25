@@ -1,0 +1,11 @@
+
+
+#need a way to differentiate between tokenizer and grammar rules?
+while : while 
+lparen : (
+rparen : )
+identifier : Regex => { name = $1 }
+int : Regex => { blah = $1 }
+float : Regex => { num = $1; decimal = $2 }
+
+
