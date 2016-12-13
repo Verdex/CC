@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Box.Utils
+namespace CC.Utils
 {
     public static class Extend
     {

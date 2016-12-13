@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Box.Utils
+namespace CC.Utils
 {
     public class DisplayArray<T>
     {
