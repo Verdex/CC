@@ -11,18 +11,6 @@ namespace CC.Parsing
     {
     }
 
-    public struct ParseBuffer<T>
-    {
-        public int Index;
-        public T Text;
-
-        public ParseBuffer( T text, int index )
-        {
-            Text = text;
-            Index = index;
-        }
-    }
-
     public class FailData
     {
         public readonly int FailIndex;
@@ -33,14 +21,14 @@ namespace CC.Parsing
         }
     }
 
-    public class ParseResult<TRes, TBuffer>
+    public class ParseResult<TRes>
     {
         public readonly bool IsSuccessful;
         public readonly TRes Result;
-        public readonly ParseBuffer Buffer;
+        public readonly VIter<char> Buffer;
         public readonly FailData Failure;
 
-        public ParseResult( TRes result, ParseBuffer<TBuffer> buffer )
+        public ParseResult( TRes result, VIter<char> buffer )
         {
             IsSuccessful = true;
             Result = result;
@@ -53,11 +41,11 @@ namespace CC.Parsing
         }
     }
 
-    public delegate ParseResult<TRes> Parser<TRes, TBuffer>( ParseBuffer<TBuffer> buffer );
+    public delegate ParseResult<TRes> Parser<TRes>( VIter<char> buffer );
 
     public static class ParserUtil
     {
-        public static Parser<B, TBuffer> Bind<A, B, TBuffer>( Parser<A, TBuffer> parser, Func<A, Parser<B, TBuffer>> gen )
+        public static Parser<B> Bind<A, B>( Parser<A> parser, Func<A, Parser<B>> gen )
         {
             return buffer => 
             {
@@ -68,12 +56,12 @@ namespace CC.Parsing
                 }
                 else
                 {
-                    return new ParseResult<B>( new FailData( buffer.Index ) );
+                    return new ParseResult<B>( new FailData( buffer.GetIndex() ) );
                 }
             };
         }
 
-        public static Parser<B, TBuffer> Bind<A, B, TBuffer>( Parser<A, TBuffer> parser, Func<Parser<B, TBuffer>> gen )
+        public static Parser<B> Bind<A, B>( Parser<A> parser, Func<Parser<B>> gen )
         {
             return buffer => 
             {
@@ -84,29 +72,29 @@ namespace CC.Parsing
                 }
                 else
                 {
-                    return new ParseResult<B>( new FailData( buffer.Index ) );
+                    return new ParseResult<B>( new FailData( buffer.GetIndex() ) );
                 }
             };
         }
 
-        public static Parser<A, TBuffer> Unit<A, TBuffer>( A value )
+        public static Parser<A> Unit<A>( A value )
         {
             return buffer => new ParseResult<A>( value, buffer );
         } 
 
-        public static Parser<Empty, string> End = buffer =>  // TODO this can be for any TBuffer
+        public static Parser<Empty> End = buffer =>  
         {
-            if( buffer.Index == buffer.Text.Length )
+            if( buffer.End() )
             {
                 return new ParseResult<Empty>( new Empty(), buffer );
             }
             else
             {
-                return new ParseResult<Empty>( new FailData( buffer.Index ) ); 
+                return new ParseResult<Empty>( new FailData( buffer.GetIndex() ) ); 
             }
         };
 
-        public static Parser<B, TBuffer> Map<A, B, TBuffer>( this Parser<A, TBuffer> parser, Func<A, B> f )
+        public static Parser<B> Map<A, B>( this Parser<A> parser, Func<A, B> f )
         {
             return buffer => 
             {
@@ -117,12 +105,12 @@ namespace CC.Parsing
                 }
                 else
                 {
-                    return new ParseResult<B>( new FailData( buffer.Index ) ); 
+                    return new ParseResult<B>( new FailData( buffer.GetIndex() ) ); 
                 }
             };
         }
 
-        public static Parser<Maybe<A>, TBuffer> OneOrNone<A, TBuffer>( this Parser<A, TBuffer> parser )
+        public static Parser<Maybe<A>> OneOrNone<A>( this Parser<A> parser )
         {
             return buffer =>
             {
@@ -138,20 +126,20 @@ namespace CC.Parsing
             };
         }
 
-        public static Parser<IEnumerable<A>, TBuffer> OneOrMore<A, TBuffer>( this Parser<A, TBuffer> parser )
+        public static Parser<IEnumerable<A>> OneOrMore<A>( this Parser<A> parser )
         {
             return Bind( parser,              v  =>
                    Bind( parser.ZeroOrMore(), vs => 
                    Unit( new A[] { v }.Concat( vs ) ) ) );
         }
 
-        public static Parser<IEnumerable<A>, TBuffer> ZeroOrMore<A, TBuffer>( this Parser<A, TBuffer> parser )
+        public static Parser<IEnumerable<A>> ZeroOrMore<A>( this Parser<A> parser )
         {
             return buffer =>
             {
                 var a = new List<A>();
                 var result = parser( buffer );
-                ParseBuffer? temp = null;
+                VIter? temp = null;
                 while ( result.IsSuccessful )
                 {
                     temp = result.Buffer;
@@ -181,13 +169,32 @@ namespace CC.Parsing
                         return new ParseResult<A>( result.Result, result.Buffer );
                     }
                 }
-                return new ParseResult<A>( new FailData( buffer.Index ) ); 
+                return new ParseResult<A>( new FailData( buffer.GetIndex() ) ); 
             };
         }
 
         public static Parser<string> ParseUntil<Ignore>( Parser<Ignore> end )
         {
             return buffer =>
+            {
+                var ret = new StringBuilder();
+                var res = end( buffer );
+                while( !res.IsSuccessful && !buffer.End() )
+                {
+                    ret.Append( buffer.GetCurrent() );
+                    buffer.MoveNext();
+                    res = end( buffer );
+                }
+                if ( res.IsSuccessful )
+                {
+                    return new ParseResult<string>( ret.ToString(), res.Buffer );
+                }
+                else
+                {
+                    return new ParseResult<string>( new FailData( res.Buffer.GetIndex() ) );
+                }
+            };
+            /*return buffer =>
             {
                 var length = 0;
                 var start = buffer.Index;
@@ -206,40 +213,27 @@ namespace CC.Parsing
                 {
                     return new ParseResult<string>( new FailData( buffer.Index ) );
                 }
-            };
+            };*/
         }
 
-        public static Parser<char> EatCharIf( Func<char, bool> predicate ) 
+        public static Parser<char> EatItemIf( Func<char, bool> predicate ) 
         {
             return buffer =>
             {
-                if ( buffer.Index < buffer.Text.Length && predicate( buffer.Text[buffer.Index] ) )
+                var c = buffer.GetCurrent();
+                if ( !buffer.End() && predicate( c ) )
                 {
-                    var index = buffer.Index;
-                    buffer.Index++;
-                    return new ParseResult<char>( buffer.Text[index], buffer );
+                    buffer.MoveNext();
+                    return new ParseResult<char>( c, buffer );
                 }
                 else
                 {
-                    return new ParseResult<char>( new FailData( buffer.Index ) ); 
+                    return new ParseResult<char>( new FailData( buffer.GetIndex() ) ); 
                 }
             };
         }
 
-        public static Parser<char> EatChar = buffer => 
-        {
-            if ( buffer.Index < buffer.Text.Length )
-            {
-                var index = buffer.Index;
-                buffer.Index++;
-                return new ParseResult<char>( buffer.Text[index], buffer );
-            }
-            else
-            {
-                return new ParseResult<char>( new FailData( buffer.Index ) ); 
-            }
-        };
-
+    // TODO
         public static Parser<string> Match( string value ) 
         {
             return buffer =>
