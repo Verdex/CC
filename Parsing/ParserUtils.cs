@@ -173,6 +173,7 @@ namespace CC.Parsing
             };
         }
 
+        // TODO does this need to be a char[]?
         public static Parser<string> ParseUntil<Ignore>( Parser<Ignore> end )
         {
             return buffer =>
@@ -252,3 +253,6 @@ namespace CC.Parsing
         }
     }
 }
+
+
+// TODO can I make this into a m4 macro where i swap out all char's for something else?
