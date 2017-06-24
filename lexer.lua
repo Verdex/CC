@@ -1,5 +1,5 @@
 
-require "Token"
+require "token"
 
 function lex( input )
     
