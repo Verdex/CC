@@ -4,9 +4,10 @@
 // pre defined tokens (whats the smallest set of regex that we can pre create) ??
 // *, +, ?, etc ??
 // initialize with keyword list
+// escape "'"
 
 _blarg123 = blah      { expr '+' expr }
-          | otherBlah { expr '-' expr }
+          | otherBlah { expr '-' expr } ;
         
 
 {
