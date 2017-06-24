@@ -10,7 +10,7 @@ function lex( input )
     while start <= #input do
 
         local success = false
-        for _, map in ipairs( tokMaps ) do 
+        for _, map in ipairs( tokenMaps ) do 
             local pattern = "^" ..  map.pattern .. "()"
             local result = { string.match( input, pattern, start ) }
 
