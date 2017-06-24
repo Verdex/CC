@@ -7,6 +7,8 @@ tokenType =
     equal = "equal"; 
     openCurly = "openCurly";
     closeCurly = "closeCurly";
+    string = "string";
+    bar = "bar";
 }
 
 tokenMaps = 
@@ -42,6 +44,12 @@ tokenMaps =
     },
 
     {
+        name = "bar";
+        pattern = "|";
+        trans = function () return { type = tokenType.bar } end
+    },
+
+    {
         name = "semi colon";
         pattern = ";";
         trans = function () return { type = tokenType.semicolon } end
@@ -50,7 +58,7 @@ tokenMaps =
     {
         name = "equal";
         pattern = "=";
-        trans = function () return { type = tokenType.assign } end
+        trans = function () return { type = tokenType.equal } end
     },
 
 
