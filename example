@@ -1,11 +1,13 @@
 
 
-#need a way to differentiate between tokenizer and grammar rules?
-while : while 
-lparen : (
-rparen : )
-identifier : Regex => { name = $1 }
-int : Regex => { blah = $1 }
-float : Regex => { num = $1; decimal = $2 }
 
+_blarg123 = blah      { expr '+' expr }
+          | otherBlah { expr '-' expr }
+        
 
+{
+    type = _blarg123
+    kind = blah
+    $1 = expr1
+    $2 = expr2
+}
