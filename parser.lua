@@ -66,6 +66,8 @@ function pattern()
 
         elseif is( tokenType.closeCurly ) then
             finished = true
+        else 
+            error( "unknown token in pattern at:  " .. _index )
         end
     until finished
 
@@ -76,20 +78,40 @@ function ruleOption()
     local c = ct()
     local name
     
-    if try( tokenType.symbol ) then
-        name = c.value 
-    end
+    is( tokenType.symbol )
+    name = c.value 
 
     local ps = pattern()
     
     return name, ps
 end
 
+function rule()
+    local c = ct()
+    local name
 
+    is( tokenType.symbol )
+    name = c.value
 
+    is( tokenType.equal )
 
+    local ret = {}
+    local finished = false
+    repeat
+        local optionName, patterns = ruleOption()
+        ret[#ret+1] = { type = name; kind = optionName; patterns = patterns }
+        
+        if try( tokenType.bar ) then
+            
+        elseif try( tokenType.semicolon ) then
+            finished = true 
+        else
+            error( "unknown token in rule at:  " .. _index )
+        end
+    until finished
 
-
+    return ret
+end
 
 
 
