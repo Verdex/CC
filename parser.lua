@@ -44,7 +44,7 @@ end
 
 --[[
     blah = other { expr '+' expr }
-         | jab   { expr '-' expr }
+         | jab   { expr '-' expr } ;
 
 {
     type = blah
@@ -71,3 +71,25 @@ function pattern()
 
     return ret
 end
+
+function ruleOption()
+    local c = ct()
+    local name
+    
+    if try( tokenType.symbol ) then
+        name = c.value 
+    end
+
+    local ps = pattern()
+    
+    return name, ps
+end
+
+
+
+
+
+
+
+
+
