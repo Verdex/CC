@@ -5,6 +5,11 @@ local _tokens
 local _index 
 local _result
 
+function parse( tokens )
+    init( tokens )
+    return rules()
+end
+
 function init( tokens )
     _tokens = tokens
     _index = 1
