@@ -18,6 +18,10 @@ function nt()
     _index = _index + 1
 end
 
+function done()
+    return nil == _tokens[_index]
+end
+
 function try( tok )
     local c = ct()
     if c and tok == c.type then
@@ -47,10 +51,11 @@ end
          | jab   { expr '-' expr } ;
 
 {
-    type = blah
-    kind = other
-    1 = expr1
-    2 = expr2 
+    rule = blah
+    option = other
+    patterns = 
+        1 = expr1
+        2 = expr2 
 ]]--
 
 function pattern()
@@ -88,10 +93,9 @@ end
 
 function rule()
     local c = ct()
-    local name
 
     is( tokenType.symbol )
-    name = c.value
+    local r = c.value
 
     is( tokenType.equal )
 
@@ -99,7 +103,7 @@ function rule()
     local finished = false
     repeat
         local optionName, patterns = ruleOption()
-        ret[#ret+1] = { type = name; kind = optionName; patterns = patterns }
+        ret[#ret+1] = { option = optionName; patterns = patterns }
         
         if try( tokenType.bar ) then
             
@@ -110,7 +114,13 @@ function rule()
         end
     until finished
 
-    return ret
+    return { rule = r; options = ret }
 end
 
-    
+function rules()
+    local rs = {} 
+    while not done() do
+        rs[#rs+1] = rule() 
+    end
+    return rs
+end
