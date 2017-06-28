@@ -9,6 +9,8 @@ tokenType =
     closeCurly = "closeCurly";
     string = "string";
     bar = "bar";
+    star = "star";
+    plus = "plus";
 }
 
 tokenMaps = 
@@ -23,6 +25,18 @@ tokenMaps =
         name = "block comment";
         pattern = [[/%*.-%*/]];
         trans = function () return { type = tokenType.ignore } end
+    },
+
+    {
+        name = "star";
+        pattern = "%*";
+        trans = function () return { type = tokenType.star } end
+    },
+
+    {
+        name = "plus";
+        pattern = "%+";
+        trans = function () return { type = tokenType.plus } end
     },
 
     { 

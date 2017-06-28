@@ -71,6 +71,11 @@ function pattern()
     repeat
         local c = ct()
         if try( tokenType.symbol ) then
+            if try( tokenType.star ) then
+                c.star = true
+            elseif try( tokenType.plus ) then
+                c.plus = true
+            end 
             ret[#ret+1] = c
         elseif try( tokenType.string ) then
 
@@ -129,3 +134,4 @@ function rules()
     end
     return rs
 end
+

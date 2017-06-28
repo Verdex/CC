@@ -2,6 +2,8 @@
 function d( v )
     if type( v ) == "string" then
         return '"' .. v .. '"'
+    elseif type( v ) == "boolean" then
+        return tostring( v )
     elseif type( v ) == "number" then
         return "" .. v
     elseif type( v ) == "table" then
