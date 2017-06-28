@@ -2,6 +2,7 @@
 require 'lexer'
 require 'parser'
 require 'util'
+require 'gen'
 
 
 args = {...}
