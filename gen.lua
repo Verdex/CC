@@ -9,6 +9,10 @@
 
 --]]
 
+local baseCode= [[
+
+]]
+
 function codeGen( ast )
     
 end
