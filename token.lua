@@ -11,6 +11,8 @@ tokenType =
     bar = "bar";
     star = "star";
     plus = "plus";
+    grammar = "grammar";
+    token = "token";
 }
 
 tokenMaps = 
@@ -25,6 +27,18 @@ tokenMaps =
         name = "block comment";
         pattern = [[/%*.-%*/]];
         trans = function () return { type = tokenType.ignore } end
+    },
+
+    {
+        name = "token";
+        pattern = "token";
+        trans = function () return { type = tokenType.token } end
+    },
+    
+    {
+        name = "grammar";
+        pattern = "grammar";
+        trans = function () return { type = tokenType.grammar } end
     },
 
     {

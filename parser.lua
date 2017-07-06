@@ -51,6 +51,15 @@ function is( tok )
     end
 end
 
+function look( tok )
+    local c = ct()
+    if c and tok == c.type then
+        return true
+    else 
+        return false
+    end
+end
+
 --[[
     blah = other { expr '+' expr }
          | jab   { expr '-' expr } ;
@@ -129,9 +138,51 @@ end
 
 function rules()
     local rs = {} 
-    while not done() do
+    while not look( tokenType.closeCurly )  do
         rs[#rs+1] = rule() 
     end
     return rs
+end
+
+function grammar()
+    is( tokenType.grammar )
+    is( tokenType.openCurly )
+    local rs = rules()
+    is( tokenType.closeCurly )
+    return { type = "AST" ; rules = rs }
+end
+
+function token()
+    local c = ct()
+    
+    is( tokenType.symbol )
+    local tokenName = c.value
+
+    is( tokenType.equal )
+
+    c = ct()
+
+    is( tokenType.string )
+    local regex = c.value
+
+    is( tokenType.semicolon )
+    
+    return { token = tokenName; regex = regex }
+end
+
+function tokens()
+    local ts = {} 
+    while not look( tokenType.closeCurly )  do
+        ts[#ts+1] = token() 
+    end
+    return ts
+end
+
+function tokenGroup()
+    is( tokenType.token )
+    is( tokenType.openCurly )
+    local ts = tokens()
+    is( tokenType.closeCurly )
+    return { type = "token" ; tokenGroup = ts }
 end
 
