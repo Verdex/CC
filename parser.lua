@@ -7,7 +7,9 @@ local _result
 
 function parse( tokens )
     init( tokens )
-    return rules()
+    local toks = tokenGroup()
+    local rules = grammar()
+    return toks, rules 
 end
 
 function init( tokens )
