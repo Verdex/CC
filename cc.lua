@@ -14,6 +14,7 @@ end
 f = io.open( args[1], "r" )
 s = f:read("a")
 l = lex( s )
-p = parse( l )
+t, r = parse( l )
 
-print( d( p ) )
+print( d( t ) )
+print( d( r ) )
