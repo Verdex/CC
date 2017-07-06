@@ -1,7 +1,6 @@
 
 
-// pre defined tokens (whats the smallest set of regex that we can pre create) ??
-// *, +, ?, etc ??
+
 
 _blarg123 = blah      { expr '+' expr }
           | otherBlah { expr '-' expr } ;
